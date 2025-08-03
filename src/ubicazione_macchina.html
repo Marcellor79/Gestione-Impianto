@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ubicazione Macchina</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', Arial, sans-serif;
+            background: linear-gradient(135deg, #e3f0ff 0%, #f9f9f9 100%);
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .container {
+            background: #fff;
+            padding: 40px 32px 32px 32px;
+            border-radius: 18px;
+            box-shadow: 0 8px 32px rgba(25, 118, 210, 0.10), 0 1.5px 6px rgba(0,0,0,0.04);
+            min-width: 340px;
+            max-width: 430px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+        h1 {
+            margin-top: 0;
+            margin-bottom: 32px;
+            color: #1976d2;
+            font-weight: 600;
+            font-size: 2.1em;
+            letter-spacing: 1px;
+        }
+        .form-row {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 18px;
+        }
+        .form-row input {
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #bdbdbd;
+            font-size: 1em;
+            transition: border 0.2s;
+        }
+        .form-row input:focus {
+            border: 1.5px solid #1976d2;
+            outline: none;
+        }
+        .form-row label {
+            color: #1976d2;
+            font-weight: 500;
+            margin-bottom: 2px;
+            align-self: flex-start;
+        }
+        .button-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 18px;
+            width: 100%;
+            justify-content: center;
+        }
+        .button-row button {
+            font-size: 1em;
+            padding: 10px 18px;
+            border-radius: 8px;
+            border: none;
+            background: #1976d2;
+            color: white;
+            cursor: pointer;
+            font-weight: 500;
+            box-shadow: 0 2px 8px rgba(25, 118, 210, 0.07);
+            transition: background 0.2s, transform 0.15s;
+        }
+        .button-row button:hover {
+            background: #1565c0;
+            transform: translateY(-1px) scale(1.03);
+        }
+        .result-row {
+            margin-bottom: 24px;
+            min-height: 28px;
+            font-size: 1.08em;
+            color: #1976d2;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 24px;
+        }
+        .table-row {
+            width: 100%;
+            margin-bottom: 18px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #f5faff;
+            border-radius: 8px;
+            box-shadow: 0 1px 4px #1976d210;
+        }
+        th, td {
+            padding: 8px 12px;
+            text-align: left;
+        }
+        th {
+            color: #1976d2;
+            font-weight: 600;
+            border-bottom: 1.5px solid #1976d2;
+            background: #e3f0ff;
+        }
+        td {
+            color: #222;
+            border-bottom: 1px solid #e3f0ff;
+        }
+        .back {
+            font-size: 1em;
+            padding: 10px 22px;
+            border-radius: 8px;
+            border: none;
+            background: #1976d2;
+            color: white;
+            cursor: pointer;
+            font-weight: 500;
+            box-shadow: 0 2px 8px rgba(25, 118, 210, 0.07);
+            transition: background 0.2s, transform 0.15s;
+        }
+        .back:hover {
+            background: #1565c0;
+            transform: translateY(-2px) scale(1.03);
+        }
+        @media (max-width: 500px) {
+            .container {
+                min-width: unset;
+                width: 95vw;
+                padding: 18px 6vw 18px 6vw;
+            }
+            h1 {
+                font-size: 1.3em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Ubicazione Macchina</h1>
+        <!-- Ricerca prima -->
+        <div class="form-row" style="margin-bottom: 10px;">
+            <label for="ricercaMacchina">Ricerca Macchina</label>
+            <input type="text" id="ricercaMacchina" placeholder="Inserisci nome macchina da cercare">
+            <button id="cercaBtn" onclick="cercaUbicazione()" style="margin-top:6px; background:#1976d2; color:white; border:none; border-radius:8px; font-size:1em; font-weight:500; padding:10px 22px; box-shadow:0 2px 8px rgba(25,118,210,0.07); transition:background 0.2s,transform 0.15s; cursor:pointer;">
+                🔍 Cerca
+            </button>
+        </div>
+        <div class="table-row" id="tableRow" style="display:none;"></div>
+        <!-- Sezione aggiungi, visibile solo se admin -->
+        <div id="aggiungiSection" style="display:none;">
+            <div class="form-row">
+                <label for="macchina">Macchina</label>
+                <input type="text" id="macchina" placeholder="Es: Pressa 1">
+                <label for="cabina">Cabina</label>
+                <input type="text" id="cabina" placeholder="Es: Cabina 2">
+                <label for="mcc">MCC</label>
+                <input type="text" id="mcc" placeholder="Es: MCC 1">
+                <label for="scomparto">Scomparto</label>
+                <input type="text" id="scomparto" placeholder="Es: Scomparto A">
+            </div>
+            <div class="button-row">
+                <button onclick="aggiungiUbicazione()">Aggiungi</button>
+            </div>
+        </div>
+        <button class="back" onclick="window.location.href='index.html'">⬅️ Torna al menu</button>
+    </div>
+    <script>
+        // Carica le ubicazioni da localStorage o array vuoto
+        let ubicazioniDB = JSON.parse(localStorage.getItem('ubicazioniMacchinaDB')) || [];
+
+        function salvaDB() {
+            localStorage.setItem('ubicazioniMacchinaDB', JSON.stringify(ubicazioniDB));
+        }
+
+        function aggiungiUbicazione() {
+            const macchina = document.getElementById('macchina').value.trim();
+            const cabina = document.getElementById('cabina').value.trim();
+            const mcc = document.getElementById('mcc').value.trim();
+            const scomparto = document.getElementById('scomparto').value.trim();
+            const tableRow = document.getElementById('tableRow');
+            if (!macchina || !cabina || !mcc || !scomparto) {
+                tableRow.style.display = "block";
+                tableRow.innerHTML = `<span style="color:#e53935; font-weight:500;">Compila tutti i campi.</span>`;
+                return;
+            }
+            ubicazioniDB.push({ macchina, cabina, mcc, scomparto });
+            salvaDB();
+            tableRow.style.display = "none";
+            document.getElementById('macchina').value = "";
+            document.getElementById('cabina').value = "";
+            document.getElementById('mcc').value = "";
+            document.getElementById('scomparto').value = "";
+        }
+
+        function renderTable(filtrate = null) {
+            const tableRow = document.getElementById('tableRow');
+            const dati = filtrate || [];
+            if (dati.length === 0) {
+                tableRow.innerHTML = "<em>Nessuna ubicazione inserita.</em>";
+                return;
+            }
+            tableRow.innerHTML = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Macchina</th>
+                            <th>Cabina</th>
+                            <th>MCC</th>
+                            <th>Scomparto</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${dati.map(u => `
+                            <tr>
+                                <td>${u.macchina}</td>
+                                <td>${u.cabina}</td>
+                                <td>${u.mcc}</td>
+                                <td>${u.scomparto}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+        }
+
+        function cercaUbicazione() {
+            const ricerca = document.getElementById('ricercaMacchina').value.trim().toLowerCase();
+            const tableRow = document.getElementById('tableRow');
+            if (!ricerca) {
+                tableRow.style.display = "none";
+                return;
+            }
+            const filtrate = ubicazioniDB.filter(u => u.macchina.toLowerCase().includes(ricerca));
+            if (filtrate.length === 0) {
+                tableRow.style.display = "block";
+                tableRow.innerHTML = `<span style="color:#e53935; font-weight:500;">Nessuna macchina trovata.</span>`;
+            } else {
+                tableRow.style.display = "block";
+                renderTable(filtrate);
+            }
+        }
+
+        // Mostra/nascondi la sezione aggiungi in base al login admin
+        function mostraAggiungiSeAdmin() {
+            const aggiungiSection = document.getElementById('aggiungiSection');
+            if (!aggiungiSection) return;
+            if (localStorage.getItem('isAdmin') === 'true') {
+                aggiungiSection.style.display = 'block';
+            } else {
+                aggiungiSection.style.display = 'none';
+            }
+        }
+        // Chiama la funzione all'avvio per impostare la visibilità corretta
+        mostraAggiungiSeAdmin();
+    </script>
+</body>
+</html>

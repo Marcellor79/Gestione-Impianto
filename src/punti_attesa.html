@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Punti d'attesa</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', Arial, sans-serif;
+            background: linear-gradient(135deg, #e3f0ff 0%, #f9f9f9 100%);
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .container {
+            background: #fff;
+            padding: 40px 32px 32px 32px;
+            border-radius: 18px;
+            box-shadow: 0 8px 32px rgba(25, 118, 210, 0.10), 0 1.5px 6px rgba(0,0,0,0.04);
+            min-width: 340px;
+            max-width: 430px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+        h1 {
+            margin-top: 0;
+            margin-bottom: 32px;
+            color: #1976d2;
+            font-weight: 600;
+            font-size: 2.1em;
+            letter-spacing: 1px;
+        }
+        .form-row {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 18px;
+        }
+        .form-row input {
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #bdbdbd;
+            font-size: 1em;
+            transition: border 0.2s;
+        }
+        .form-row input:focus {
+            border: 1.5px solid #1976d2;
+            outline: none;
+        }
+        .form-row label {
+            color: #1976d2;
+            font-weight: 500;
+            margin-bottom: 2px;
+            align-self: flex-start;
+        }
+        .button-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 18px;
+            width: 100%;
+            justify-content: center;
+        }
+        .button-row button {
+            font-size: 1em;
+            padding: 10px 18px;
+            border-radius: 8px;
+            border: none;
+            background: #1976d2;
+            color: white;
+            cursor: pointer;
+            font-weight: 500;
+            box-shadow: 0 2px 8px rgba(25, 118, 210, 0.07);
+            transition: background 0.2s, transform 0.15s;
+        }
+        .button-row button:hover, #cercaBtn:hover {
+            background: #1565c0;
+            transform: translateY(-1px) scale(1.03);
+        }
+        .table-row {
+            width: 100%;
+            margin-bottom: 18px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #f5faff;
+            border-radius: 8px;
+            box-shadow: 0 1px 4px #1976d210;
+        }
+        th, td {
+            padding: 8px 12px;
+            text-align: left;
+        }
+        th {
+            color: #1976d2;
+            font-weight: 600;
+            border-bottom: 1.5px solid #1976d2;
+            background: #e3f0ff;
+        }
+        td {
+            color: #222;
+            border-bottom: 1px solid #e3f0ff;
+        }
+        .back {
+            font-size: 1em;
+            padding: 10px 22px;
+            border-radius: 8px;
+            border: none;
+            background: #1976d2;
+            color: white;
+            cursor: pointer;
+            font-weight: 500;
+            box-shadow: 0 2px 8px rgba(25, 118, 210, 0.07);
+            transition: background 0.2s, transform 0.15s;
+        }
+        .back:hover {
+            background: #1565c0;
+            transform: translateY(-2px) scale(1.03);
+        }
+        @media (max-width: 500px) {
+            .container {
+                min-width: unset;
+                width: 95vw;
+                padding: 18px 6vw 18px 6vw;
+            }
+            h1 {
+                font-size: 1.3em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Punti d'attesa</h1>
+        <!-- Ricerca sopra -->
+        <div class="form-row" style="margin-bottom: 10px;">
+            <label for="ricercaReparto">Ricerca Reparto</label>
+            <input type="text" id="ricercaReparto" placeholder="Inserisci nome reparto da cercare">
+            <button id="cercaBtn" onclick="cercaPunto()" style="margin-top:6px; background:#1976d2; color:white; border:none; border-radius:8px; font-size:1em; font-weight:500; padding:10px 22px; box-shadow:0 2px 8px rgba(25,118,210,0.07); transition:background 0.2s,transform 0.15s; cursor:pointer;">
+                🔍 Cerca
+            </button>
+        </div>
+        <div class="table-row" id="tableRow" style="display:none;"></div>
+        <!-- Sezione aggiungi, visibile solo se admin -->
+        <div id="aggiungiSection" style="display:none;">
+            <div class="form-row">
+                <label for="reparto">Reparto</label>
+                <input type="text" id="reparto" placeholder="Es: Reparto A">
+                <label for="puntoAttesa">Punto d'attesa</label>
+                <input type="text" id="puntoAttesa" placeholder="Es: Punto 1">
+                <label for="puntoRaccolta">Punto di raccolta</label>
+                <input type="text" id="puntoRaccolta" placeholder="Es: Raccolta Nord">
+            </div>
+            <div class="button-row">
+                <button onclick="aggiungiPunto()">Aggiungi</button>
+            </div>
+        </div>
+        <button class="back" onclick="window.location.href='index.html'">⬅️ Torna al menu</button>
+    </div>
+    <script>
+        // Carica i punti d'attesa da localStorage o array vuoto
+        let puntiDB = JSON.parse(localStorage.getItem('puntiAttesaDB')) || [];
+
+        function salvaDB() {
+            localStorage.setItem('puntiAttesaDB', JSON.stringify(puntiDB));
+        }
+
+        function aggiungiPunto() {
+            const reparto = document.getElementById('reparto').value.trim();
+            const puntoAttesa = document.getElementById('puntoAttesa').value.trim();
+            const puntoRaccolta = document.getElementById('puntoRaccolta').value.trim();
+            if (!reparto || !puntoAttesa || !puntoRaccolta) {
+                mostraTabella([], "Compila tutti i campi.", "tableRow");
+                return;
+            }
+            puntiDB.push({ reparto, puntoAttesa, puntoRaccolta });
+            salvaDB();
+            document.getElementById('reparto').value = "";
+            document.getElementById('puntoAttesa').value = "";
+            document.getElementById('puntoRaccolta').value = "";
+            // Nascondi la tabella dopo aggiunta
+            document.getElementById('tableRow').style.display = "none";
+        }
+
+        function mostraTabella(dati, messaggioVuoto, tableId) {
+            const tableRow = document.getElementById(tableId);
+            if (dati.length === 0) {
+                tableRow.innerHTML = `<span style="color:#e53935; font-weight:500;">${messaggioVuoto}</span>`;
+                tableRow.style.display = "block";
+                return;
+            }
+            tableRow.innerHTML = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Reparto</th>
+                            <th>Punto d'attesa</th>
+                            <th>Punto di raccolta</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${dati.map(p => `
+                            <tr>
+                                <td>${p.reparto}</td>
+                                <td>${p.puntoAttesa}</td>
+                                <td>${p.puntoRaccolta}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+            tableRow.style.display = "block";
+        }
+
+        function cercaPunto() {
+            const ricerca = document.getElementById('ricercaReparto').value.trim().toLowerCase();
+            const filtrate = puntiDB.filter(p => p.reparto.toLowerCase().includes(ricerca));
+            mostraTabella(
+                ricerca ? filtrate : [],
+                ricerca ? "Nessun punto d'attesa trovato." : "",
+                "tableRow"
+            );
+        }
+
+        // Mostra/nascondi la sezione aggiungi in base al login admin
+        function mostraAggiungiSeAdmin() {
+            const aggiungiSection = document.getElementById('aggiungiSection');
+            if (!aggiungiSection) return;
+            if (localStorage.getItem('isAdmin') === 'true') {
+                aggiungiSection.style.display = 'block';
+            } else {
+                aggiungiSection.style.display = 'none';
+            }
+        }
+        // Chiama la funzione all'avvio
+        mostraAggiungiSeAdmin();
+    </script>
+</body>
+</html>

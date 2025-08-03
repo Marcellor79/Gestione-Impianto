@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ricerca Guasti - Macchine</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', Arial, sans-serif;
+            background: linear-gradient(135deg, #e3f0ff 0%, #f9f9f9 100%);
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .container {
+            background: #fff;
+            padding: 40px 32px 32px 32px;
+            border-radius: 18px;
+            box-shadow: 0 8px 32px rgba(25, 118, 210, 0.10), 0 1.5px 6px rgba(0,0,0,0.04);
+            min-width: 340px;
+            max-width: 400px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+        h1 {
+            margin-top: 0;
+            margin-bottom: 32px;
+            color: #1976d2;
+            font-weight: 600;
+            font-size: 2.1em;
+            letter-spacing: 1px;
+            text-align: center;
+        }
+        .search-box {
+            display: flex;
+            width: 100%;
+            gap: 10px;
+            margin-bottom: 24px;
+            justify-content: center;
+        }
+        .search-box input {
+            flex: 1;
+            padding: 12px;
+            border-radius: 6px;
+            border: 1px solid #bdbdbd;
+            font-size: 1em;
+            transition: border 0.2s;
+        }
+        .search-box input:focus {
+            border: 1.5px solid #1976d2;
+            outline: none;
+        }
+        .search-box button {
+            font-size: 1em;
+            padding: 12px 18px;
+            border-radius: 6px;
+            border: none;
+            background: #1976d2;
+            color: white;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background 0.2s, transform 0.15s;
+        }
+        .search-box button:hover {
+            background: #1565c0;
+            transform: translateY(-1px) scale(1.03);
+        }
+        .result {
+            margin-bottom: 24px;
+            color: #333;
+            font-size: 1.08em;
+            min-height: 32px;
+        }
+        .add-box {
+            width: 100%;
+            margin-bottom: 24px;
+            background: #f5faff;
+            border-radius: 10px;
+            padding: 18px 12px 12px 12px;
+            box-sizing: border-box;
+            box-shadow: 0 1px 4px rgba(25, 118, 210, 0.05);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .add-box label {
+            color: #1976d2;
+            font-weight: 500;
+            margin-bottom: 4px;
+            align-self: flex-start;
+        }
+        .add-box input {
+            width: 100%;
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #bdbdbd;
+            font-size: 1em;
+            transition: border 0.2s;
+        }
+        .add-box input:focus {
+            border: 1.5px solid #1976d2;
+            outline: none;
+        }
+        .add-box button {
+            background: #43a047;
+            color: white;
+            padding: 10px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1em;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.15s;
+        }
+        .add-box button:hover {
+            background: #388e3c;
+            transform: translateY(-1px) scale(1.03);
+        }
+        .add-result {
+            color: #1976d2;
+            margin-bottom: 10px;
+            min-height: 20px;
+            font-size: 0.98em;
+        }
+        button.back {
+            font-size: 1em;
+            padding: 10px 22px;
+            border-radius: 8px;
+            border: none;
+            background: #1976d2;
+            color: white;
+            cursor: pointer;
+            font-weight: 500;
+            box-shadow: 0 2px 8px rgba(25, 118, 210, 0.07);
+            transition: background 0.2s, transform 0.15s;
+        }
+        button.back:hover {
+            background: #1565c0;
+            transform: translateY(-2px) scale(1.03);
+        }
+        @media (max-width: 500px) {
+            .container {
+                min-width: unset;
+                width: 95vw;
+                padding: 18px 6vw 18px 6vw;
+            }
+            h1 {
+                font-size: 1.3em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Ricerca Macchina</h1>
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="Inserisci nome macchina...">
+            <button onclick="cercaMacchina()">Cerca</button>
+        </div>
+        <div class="result" id="result"></div>
+
+        <!-- Sezione aggiungi, visibile solo se admin -->
+        <div class="add-box" id="aggiungiSection" style="display:none;">
+            <div class="add-result" id="addResult"></div>
+            <label for="nomeMacchina">Nome macchina</label>
+            <input type="text" id="nomeMacchina" placeholder="Es: Nastro 1-1">
+            <button onclick="aggiungiMacchina()">Aggiungi Macchina</button>
+        </div>
+
+        <button class="back" onclick="window.location.href='index.html'">⬅️ Torna al menu</button>
+    </div>
+    <script>
+        // Carica il database macchine da localStorage o usa quello di default
+        let macchineDB = JSON.parse(localStorage.getItem('macchineDB')) || [
+            { nome: "Pressa 1" },
+            { nome: "Taglierina" },
+            { nome: "Forno 3" },
+            { nome: "Robot Saldatura" }
+        ];
+
+        function salvaDB() {
+            localStorage.setItem('macchineDB', JSON.stringify(macchineDB));
+        }
+
+        function cercaMacchina() {
+            const input = document.getElementById('searchInput').value.trim().toLowerCase();
+            const resultDiv = document.getElementById('result');
+            if (!input) {
+                resultDiv.textContent = "Inserisci un nome macchina per la ricerca.";
+                return;
+            }
+            const trovata = macchineDB.find(m => m.nome.toLowerCase().includes(input));
+            if (trovata) {
+                // Salva il nome della macchina selezionata in localStorage per la pagina guasti
+                resultDiv.innerHTML = `<strong class="macchina-link" style="color:#1976d2; cursor:pointer;" onclick="vaiAGuasti('${trovata.nome.replace(/'/g, "\\'")}')">${trovata.nome}</strong>`;
+            } else {
+                resultDiv.textContent = "Nessuna macchina trovata con questo nome.";
+            }
+        }
+
+        function vaiAGuasti(nomeMacchina) {
+            // Salva il nome della macchina selezionata per la pagina guasti
+            localStorage.setItem('macchinaSelezionata', nomeMacchina);
+            window.location.href = 'guasti.html';
+        }
+
+        // Permetti invio con Enter nella ricerca
+        document.getElementById('searchInput').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                cercaMacchina();
+            }
+        });
+
+        // Funzione per aggiungere una macchina
+        function aggiungiMacchina() {
+            const nome = document.getElementById('nomeMacchina').value.trim();
+            const addResult = document.getElementById('addResult');
+
+            if (!nome) {
+                addResult.textContent = "Inserisci il nome della macchina.";
+                addResult.style.color = "#e53935";
+                return;
+            }
+
+            // Controllo duplicati
+            if (macchineDB.some(m => m.nome.toLowerCase() === nome.toLowerCase())) {
+                addResult.textContent = "Questa macchina esiste già.";
+                addResult.style.color = "#e53935";
+                return;
+            }
+
+            macchineDB.push({ nome: nome });
+            salvaDB();
+            addResult.textContent = "Macchina aggiunta con successo!";
+            addResult.style.color = "#43a047";
+            document.getElementById('nomeMacchina').value = "";
+        }
+
+        // Mostra/nascondi la sezione aggiungi in base al login admin
+        function mostraAggiungiSeAdmin() {
+            const aggiungiSection = document.getElementById('aggiungiSection');
+            if (!aggiungiSection) return;
+            if (localStorage.getItem('isAdmin') === 'true') {
+                aggiungiSection.style.display = 'flex';
+            } else {
+                aggiungiSection.style.display = 'none';
+            }
+        }
+        // Chiama la funzione all'avvio
+        mostraAggiungiSeAdmin();
+    </script>
+</body>
+</html>

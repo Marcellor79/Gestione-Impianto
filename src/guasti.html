@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestione Guasti</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', Arial, sans-serif;
+            background: linear-gradient(135deg, #e3f0ff 0%, #f9f9f9 100%);
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .container {
+            background: #fff;
+            padding: 40px 32px 32px 32px;
+            border-radius: 18px;
+            box-shadow: 0 8px 32px rgba(25, 118, 210, 0.10), 0 1.5px 6px rgba(0,0,0,0.04);
+            min-width: 340px;
+            max-width: 430px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+        h1 {
+            margin-top: 0;
+            margin-bottom: 18px;
+            color: #1976d2;
+            font-weight: 600;
+            font-size: 2em;
+            letter-spacing: 1px;
+        }
+        .macchina-selezionata {
+            font-size: 1.1em;
+            color: #1565c0;
+            margin-bottom: 24px;
+            font-weight: 500;
+        }
+        .guasti-list {
+            width: 100%;
+            margin-bottom: 24px;
+            text-align: left;
+        }
+        .guasto-item {
+            background: #f5faff;
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin-bottom: 10px;
+            box-shadow: 0 1px 4px rgba(25, 118, 210, 0.05);
+        }
+        .add-guasto-box {
+            width: 100%;
+            margin-bottom: 24px;
+            background: #f5faff;
+            border-radius: 10px;
+            padding: 18px 12px 12px 12px;
+            box-sizing: border-box;
+            box-shadow: 0 1px 4px rgba(25, 118, 210, 0.05);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .add-guasto-box label {
+            color: #1976d2;
+            font-weight: 500;
+            margin-bottom: 4px;
+            align-self: flex-start;
+        }
+        .add-guasto-box input {
+            width: 100%;
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #bdbdbd;
+            font-size: 1em;
+            transition: border 0.2s;
+        }
+        .add-guasto-box input:focus {
+            border: 1.5px solid #1976d2;
+            outline: none;
+        }
+        .add-guasto-box button {
+            background: #43a047;
+            color: white;
+            padding: 10px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1em;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.15s;
+        }
+        .add-guasto-box button:hover {
+            background: #388e3c;
+            transform: translateY(-1px) scale(1.03);
+        }
+        .add-guasto-result {
+            color: #1976d2;
+            margin-bottom: 10px;
+            min-height: 20px;
+            font-size: 0.98em;
+        }
+        button.back {
+            font-size: 1em;
+            padding: 10px 22px;
+            border-radius: 8px;
+            border: none;
+            background: #1976d2;
+            color: white;
+            cursor: pointer;
+            font-weight: 500;
+            box-shadow: 0 2px 8px rgba(25, 118, 210, 0.07);
+            transition: background 0.2s, transform 0.15s;
+        }
+        button.back:hover {
+            background: #1565c0;
+            transform: translateY(-2px) scale(1.03);
+        }
+        @media (max-width: 500px) {
+            .container {
+                min-width: unset;
+                width: 95vw;
+                padding: 18px 6vw 18px 6vw;
+            }
+            h1 {
+                font-size: 1.3em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Gestione Guasti</h1>
+        <div class="macchina-selezionata" id="macchinaSelezionata"></div>
+        <div class="guasti-list" id="guastiList"></div>
+        <!-- Sezione aggiungi, visibile solo se admin -->
+        <div class="add-guasto-box" id="aggiungiSection" style="display:none;">
+            <div class="add-guasto-result" id="addGuastoResult"></div>
+            <label for="codiceGuasto">Codice guasto</label>
+            <input type="text" id="codiceGuasto" placeholder="Es: Mancata risposta centrifugo">
+            <button onclick="aggiungiGuasto()">Aggiungi Guasto</button>
+        </div>
+        <button class="back" onclick="window.location.href='macchine.html'">⬅️ Torna alla ricerca macchine</button>
+    </div>
+    <script>
+        // Recupera la macchina selezionata
+        const macchina = localStorage.getItem('macchinaSelezionata');
+        document.getElementById('macchinaSelezionata').textContent = macchina
+            ? `Macchina selezionata: ${macchina}`
+            : "Nessuna macchina selezionata.";
+
+        // Carica i guasti dal localStorage per la macchina selezionata
+        function getGuasti() {
+            const allGuasti = JSON.parse(localStorage.getItem('guastiDB')) || {};
+            return allGuasti[macchina] || [];
+        }
+
+        function salvaGuasti(guasti) {
+            const allGuasti = JSON.parse(localStorage.getItem('guastiDB')) || {};
+            allGuasti[macchina] = guasti;
+            localStorage.setItem('guastiDB', JSON.stringify(allGuasti));
+        }
+
+        function renderGuasti() {
+            const guasti = getGuasti();
+            const guastiList = document.getElementById('guastiList');
+            if (!macchina) {
+                guastiList.innerHTML = "<em>Seleziona una macchina per visualizzare i guasti.</em>";
+                return;
+            }
+            if (guasti.length === 0) {
+                guastiList.innerHTML = "<em>Nessun guasto registrato per questa macchina.</em>";
+                return;
+            }
+            guastiList.innerHTML = guasti.map(g =>
+                `<div class="guasto-item">
+                    <strong class="guasto-link" style="color:#1976d2; cursor:pointer;" onclick="vaiAComponenti('${g.codice.replace(/'/g, "\\'")}')">${g.codice}</strong>
+                </div>`
+            ).join('');
+        }
+
+        function aggiungiGuasto() {
+            const codice = document.getElementById('codiceGuasto').value.trim();
+            const addResult = document.getElementById('addGuastoResult');
+            if (!codice) {
+                addResult.textContent = "Inserisci il codice guasto.";
+                addResult.style.color = "#e53935";
+                return;
+            }
+            let guasti = getGuasti();
+            if (guasti.some(g => g.codice.toLowerCase() === codice.toLowerCase())) {
+                addResult.textContent = "Questo codice guasto esiste già per questa macchina.";
+                addResult.style.color = "#e53935";
+                return;
+            }
+            guasti.push({ codice });
+            salvaGuasti(guasti);
+            addResult.textContent = "Guasto aggiunto con successo!";
+            addResult.style.color = "#43a047";
+            document.getElementById('codiceGuasto').value = "";
+            renderGuasti();
+        }
+
+        function vaiAComponenti(codiceGuasto) {
+            // Salva il codice guasto selezionato per la pagina componenti
+            localStorage.setItem('guastoSelezionato', codiceGuasto);
+            window.location.href = 'componenti.html';
+        }
+
+        // Mostra i guasti all'avvio
+        renderGuasti();
+
+        // Mostra/nascondi la sezione aggiungi in base al login admin
+        function mostraAggiungiSeAdmin() {
+            const aggiungiSection = document.getElementById('aggiungiSection');
+            if (!aggiungiSection) return;
+            if (localStorage.getItem('isAdmin') === 'true') {
+                aggiungiSection.style.display = 'flex';
+            } else {
+                aggiungiSection.style.display = 'none';
+            }
+        }
+
+        // Controlla il login admin all'avvio
+        document.addEventListener('DOMContentLoaded', () => {
+            mostraAggiungiSeAdmin();
+        });
+    </script>
+</body>
+</html>

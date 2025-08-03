@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ricerca Guasto</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', Arial, sans-serif;
+            background: linear-gradient(135deg, #e3f0ff 0%, #f9f9f9 100%);
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .container {
+            background: #fff;
+            padding: 40px 32px 32px 32px;
+            border-radius: 18px;
+            box-shadow: 0 8px 32px rgba(25, 118, 210, 0.10), 0 1.5px 6px rgba(0,0,0,0.04);
+            min-width: 340px;
+            max-width: 430px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+        h1 {
+            margin-top: 0;
+            margin-bottom: 18px;
+            color: #1976d2;
+            font-weight: 600;
+            font-size: 2em;
+            letter-spacing: 1px;
+        }
+        .guasto-selezionato {
+            font-size: 1.1em;
+            color: #1565c0;
+            margin-bottom: 24px;
+            font-weight: 500;
+        }
+        .componenti-list {
+            width: 100%;
+            margin-bottom: 24px;
+            text-align: left;
+        }
+        .componente-item {
+            background: #f5faff;
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin-bottom: 10px;
+            box-shadow: 0 1px 4px rgba(25, 118, 210, 0.05);
+        }
+        .add-componente-box {
+            width: 100%;
+            margin-bottom: 24px;
+            background: #f5faff;
+            border-radius: 10px;
+            padding: 18px 12px 12px 12px;
+            box-sizing: border-box;
+            box-shadow: 0 1px 4px rgba(25, 118, 210, 0.05);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .add-componente-box label {
+            color: #1976d2;
+            font-weight: 500;
+            margin-bottom: 4px;
+            align-self: flex-start;
+        }
+        .add-componente-box input,
+        .add-componente-box textarea {
+            width: 100%;
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #bdbdbd;
+            font-size: 1em;
+            transition: border 0.2s;
+        }
+        .add-componente-box input:focus,
+        .add-componente-box textarea:focus {
+            border: 1.5px solid #1976d2;
+            outline: none;
+        }
+        .add-componente-box button {
+            background: #43a047;
+            color: white;
+            padding: 10px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1em;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.15s;
+        }
+        .add-componente-box button:hover {
+            background: #388e3c;
+            transform: translateY(-1px) scale(1.03);
+        }
+        .add-componente-result {
+            color: #1976d2;
+            margin-bottom: 10px;
+            min-height: 20px;
+            font-size: 0.98em;
+        }
+        button.back {
+            font-size: 1em;
+            padding: 10px 22px;
+            border-radius: 8px;
+            border: none;
+            background: #1976d2;
+            color: white;
+            cursor: pointer;
+            font-weight: 500;
+            box-shadow: 0 2px 8px rgba(25, 118, 210, 0.07);
+            transition: background 0.2s, transform 0.15s;
+        }
+        button.back:hover {
+            background: #1565c0;
+            transform: translateY(-2px) scale(1.03);
+        }
+        @media (max-width: 500px) {
+            .container {
+                min-width: unset;
+                width: 95vw;
+                padding: 18px 6vw 18px 6vw;
+            }
+            h1 {
+                font-size: 1.3em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Ricerca Guasto</h1>
+        <div class="guasto-selezionato" id="guastoSelezionato"></div>
+        <div class="componenti-list" id="componentiList"></div>
+        <!-- Sezione aggiungi, visibile solo se admin -->
+        <div class="add-componente-box" id="aggiungiSection" style="display:none;">
+            <div class="add-componente-result" id="addComponenteResult"></div>
+            <label for="descComponente">Descrizione</label>
+            <textarea id="descComponente" rows="2" placeholder="Descrizione del componente"></textarea>
+            <label for="ubicazioneComponente">Ubicazione</label>
+            <input type="text" id="ubicazioneComponente" placeholder="Es: Quadro elettrico, reparto A">
+            <button onclick="aggiungiComponente()">Aggiungi Componente</button>
+        </div>
+        <button class="back" onclick="window.location.href='guasti.html'">⬅️ Torna ai guasti</button>
+    </div>
+    <script>
+        // Recupera il guasto selezionato
+        const guasto = localStorage.getItem('guastoSelezionato');
+        document.getElementById('guastoSelezionato').textContent = guasto
+            ? `Guasto selezionato: ${guasto}`
+            : "Nessun guasto selezionato.";
+
+        // Carica i componenti dal localStorage per il guasto selezionato
+        function getComponenti() {
+            const allComponenti = JSON.parse(localStorage.getItem('componentiDB')) || {};
+            return allComponenti[guasto] || [];
+        }
+
+        function salvaComponenti(componenti) {
+            const allComponenti = JSON.parse(localStorage.getItem('componentiDB')) || {};
+            allComponenti[guasto] = componenti;
+            localStorage.setItem('componentiDB', JSON.stringify(allComponenti));
+        }
+
+        function renderComponenti() {
+            const componenti = getComponenti();
+            const componentiList = document.getElementById('componentiList');
+            if (!guasto) {
+                componentiList.innerHTML = "<em>Seleziona un guasto per visualizzare i componenti.</em>";
+                return;
+            }
+            if (componenti.length === 0) {
+                componentiList.innerHTML = "<em>Nessun componente registrato per questo guasto.</em>";
+                return;
+            }
+            // Crea la tabella
+            let table = `<table style="width:100%; border-collapse:collapse;">
+                <thead>
+                    <tr>
+                        <th style="border-bottom:1.5px solid #1976d2; padding:8px; text-align:left; color:#1976d2;">Descrizione</th>
+                        <th style="border-bottom:1.5px solid #1976d2; padding:8px; text-align:left; color:#1976d2;">Ubicazione</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${componenti.map(c => `
+                        <tr>
+                            <td style="padding:8px; border-bottom:1px solid #e3f0ff;">${c.descrizione ? c.descrizione : ''}</td>
+                            <td style="padding:8px; border-bottom:1px solid #e3f0ff;">${c.ubicazione ? c.ubicazione : ''}</td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>`;
+            componentiList.innerHTML = table;
+        }
+
+        function aggiungiComponente() {
+            const descrizione = document.getElementById('descComponente').value.trim();
+            const ubicazione = document.getElementById('ubicazioneComponente').value.trim();
+            const addResult = document.getElementById('addComponenteResult');
+            if (!descrizione) {
+                addResult.textContent = "Inserisci la descrizione del componente.";
+                addResult.style.color = "#e53935";
+                return;
+            }
+            let componenti = getComponenti();
+            // Controllo duplicati solo su descrizione
+            if (componenti.some(c => (c.descrizione || '').toLowerCase() === descrizione.toLowerCase())) {
+                addResult.textContent = "Questo componente esiste già per questo guasto.";
+                addResult.style.color = "#e53935";
+                return;
+            }
+            componenti.push({ descrizione, ubicazione });
+            salvaComponenti(componenti);
+            addResult.textContent = "Componente aggiunto con successo!";
+            addResult.style.color = "#43a047";
+            document.getElementById('descComponente').value = "";
+            document.getElementById('ubicazioneComponente').value = "";
+            renderComponenti();
+        }
+
+        // Mostra i componenti all'avvio
+        renderComponenti();
+
+        // Mostra/nascondi la sezione aggiungi in base al login admin
+        function mostraAggiungiSeAdmin() {
+            const aggiungiSection = document.getElementById('aggiungiSection');
+            if (!aggiungiSection) return;
+            if (localStorage.getItem('isAdmin') === 'true') {
+                aggiungiSection.style.display = 'flex';
+            } else {
+                aggiungiSection.style.display = 'none';
+            }
+        }
+        // Chiama la funzione all'avvio
+        mostraAggiungiSeAdmin();
+    </script>
+</body>
+</html>

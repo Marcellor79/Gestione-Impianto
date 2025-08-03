@@ -1,0 +1,27 @@
+[
+    {
+        "errorCode": "E001",
+        "description": "Overheating detected in machine A.",
+        "timestamp": "2023-10-01T10:00:00Z"
+    },
+    {
+        "errorCode": "E002",
+        "description": "Low oil pressure in machine B.",
+        "timestamp": "2023-10-02T11:30:00Z"
+    },
+    {
+        "errorCode": "E003",
+        "description": "Sensor malfunction in machine C.",
+        "timestamp": "2023-10-03T14:15:00Z"
+    },
+    {
+        "errorCode": "E004",
+        "description": "Power failure in machine D.",
+        "timestamp": "2023-10-04T09:45:00Z"
+    },
+    {
+        "errorCode": "E005",
+        "description": "Vibration levels exceed normal range in machine E.",
+        "timestamp": "2023-10-05T16:20:00Z"
+    }
+]
